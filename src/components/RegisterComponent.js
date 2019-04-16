@@ -7,30 +7,72 @@ import {
   Button,
   TouchableHighlight,
   Image,
-  Alert
+  Alert,
+  ToastAndroid 
 } from 'react-native';
-import { relative } from 'path';
+import {registerUser} from '../Services/Service';
+
+const Toast = (props) => {
+    if (props.visible) {
+      ToastAndroid.showWithGravityAndOffset(
+        props.message,
+        ToastAndroid.LONG,
+        ToastAndroid.BOTTOM,
+        25,
+        50,
+      );
+      return null;
+    }
+    return null;
+  };
+
+
+
 
 
 export default class Register extends Component {
 
   constructor(props) {
     super(props);
-    state = {
+    this.state = {
+        user:{
       fullName: '',
       email   : '',
       password: '',
     }
   }
 
-  onClickListener = (viewId) => {
-    Alert.alert("Alert", "Button pressed "+viewId);
+  this.handleChange = this.handleChange.bind(this);
+  this.register=this.register.bind(this);
+  
+  
   }
+handleChange(e,fieldName){
+    let currentState = this.state;
+    currentState.user[fieldName] = e.nativeEvent.text;
+    this.setState(currentState)
+}
+
+register(){
+    registerUser(this.state.user).then(result=>{
+        this.setState({message:'User Created Successfully',visible:true});
+    }).catch(err=>{
+        this.setState({message:err.message,visible:true});
+    });
+    this.props.navigation.navigate('Login')
+
+}
+
+
+
+
+
 
   render() {
     return (
-      <View style={{backgroundColor: 'blue',top :0 ,bottom:0,left:0,right:0}}>
-       <Text style={{fontWeight: 'bold',fontSize: 25,marginBottom:20}}>
+        <View style={styles.container}>
+             <View style={{backgroundColor: 'blue',top :0 ,bottom:0,left:0,right:0}}>
+       <Text style={{fontWeight: 'bold',fontSize: 25,marginBottom:20,marginLeft:120}}>
         Registration
         </Text>
         <View style={styles.inputContainer}>
@@ -40,7 +82,7 @@ export default class Register extends Component {
               placeholder="Full name"
               keyboardType="email-address"
               underlineColorAndroid='transparent'
-              onChangeText={(fullName) => this.setState({fullName})}/>
+              onChange={(e) =>{this.handleChange(e,'fullName')}}/>
         </View>
 
         <View style={styles.inputContainer}>
@@ -49,7 +91,7 @@ export default class Register extends Component {
               placeholder="Email"
               keyboardType="email-address"
               underlineColorAndroid='transparent'
-              onChangeText={(email) => this.setState({email})}/>
+              onChange={(e) =>{this.handleChange(e,'email')}}/>
         </View>
         
         <View style={styles.inputContainer}>
@@ -58,13 +100,17 @@ export default class Register extends Component {
               placeholder="Password"
               secureTextEntry={true}
               underlineColorAndroid='transparent'
-              onChangeText={(password) => this.setState({password})}/>
+              onChange={(e) =>{this.handleChange(e,'password')}}/>
         </View>
 
-        <TouchableHighlight style={[styles.buttonContainer, styles.signupButton]} onPress={() => this.onClickListener('sign_up')}>
+        <TouchableHighlight style={[styles.buttonContainer, styles.signupButton]} onPress={this.register}>
           <Text style={styles.signUpText}>Sign up</Text>
         </TouchableHighlight>
       </View>
+
+      <Toast visible={this.state.visible} message={this.state.message} />
+        </View>    
+      
     );
   }
 }
@@ -75,7 +121,8 @@ const styles2 = StyleSheet.create({
       flex: 1,
       justifyContent: 'center',
       alignItems: 'center',
-      marginTop:300
+      marginTop:400,
+      marginLeft:150
     }
 
 });
@@ -86,7 +133,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop:400
+    
   },
 
   container2: {
@@ -106,7 +153,10 @@ const styles = StyleSheet.create({
       height:45,
       marginBottom:20,
       flexDirection: 'row',
-      alignItems:'center'
+      alignItems:'center',
+      marginLeft:70
+      
+     
   },
   inputs:{
       height:45,
@@ -128,6 +178,7 @@ const styles = StyleSheet.create({
     marginBottom:20,
     width:250,
     borderRadius:30,
+    marginLeft:70
   },
   signupButton: {
     backgroundColor: "#008b8b",
